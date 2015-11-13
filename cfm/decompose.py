@@ -1,14 +1,11 @@
-import modules.mstft as mstft
+import mstft
 import pylab as plt
 import numpy as np
 import itertools
-import soundfile as sf
-import argparse
-import yaml
-import os
+from progressbar import ProgressBar, FormatLabel, Bar
 
 
-"""-------------------------------------------------------------------------------------------------
+"""-----------------------------------------------------------------------------
 Common Fate model:
 Vj(a,b,f,t,c) = P(a,b,f,j)At(t,j)Ac(c,j)
 
@@ -16,7 +13,7 @@ So we have one modulation texture "shape" for each frequency, hence P(a,b,f,j)
 which is activated over time, this is At(t,j) and over channels, this is
 Ac(c,j)
 
--------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 Antoine Liutkus, Inria 2015"""
 
 
@@ -33,8 +30,9 @@ def MNMFfit(Z, niter, P, At, Ac, beta=1):
         return (np.einsum(einsumString, Z*(Zhat**(beta-2)), *factors) /
                 np.einsum(einsumString, Zhat**(beta-1), *factors))
 
-    for it in range(niter):
-        print 'MNMF fit: iteration %d/%d' % (it+1, niter)
+    widgets = [FormatLabel('NTF Iteration %(value)d '), Bar()]
+    progress = ProgressBar(widgets=widgets)
+    for it in progress(range(niter)):
         P *= MU('abftc,tj,cj->abfj', Z, (At, Ac))
         At *= MU('abftc,abfj,cj->tj', Z, (P, Ac))
         Ac *= MU('abftc,abfj,tj->cj', Z, (P, At))
@@ -80,7 +78,7 @@ def displayMSTFT(Z, name=None):
         plt.savefig(name)
 
 
-def process(signal, rate, pref, verbose=False, cluster=None, display=True):
+def process(signal, rate, pref, verbose=False, cluster=None, display=None):
     '''Applies CFM Separation
 
     Args:
@@ -97,7 +95,7 @@ def process(signal, rate, pref, verbose=False, cluster=None, display=True):
     mhop = (pref['mhop_A'], pref['mhop_B'])
 
     print 'computing STFT'
-    xstft = mstft.stft(xwave, pref['nfft'], pref['thop'])
+    xstft = mstft.stft(signal, pref['nfft'], pref['thop'])
 
     # compute modulation STFT
     print 'computing modulation STFT'
@@ -126,17 +124,21 @@ def process(signal, rate, pref, verbose=False, cluster=None, display=True):
     # source estimates
     estimates = []
     for j in range(pref['J']):
-        print 'source %d/%d: separation' % (j+1, pref['J'])
-        Fj = hat(P[..., j][..., None],
-                 At[..., j][..., None],
-                 Ac[..., j][..., None], eps=eps/float(pref['J']))
+
+        print 'component %d/%d: separation' % (j+1, pref['J'])
+        Fj = hat(
+            P[..., j][..., None],
+            At[..., j][..., None],
+            Ac[..., j][..., None],
+            eps=eps/float(pref['J'])
+        )
 
         yj = Fj/model*x
 
         if display:
-            displayMSTFT(Fj[..., :10, :80, 0], name='source%d.eps' % (j+1))
+            displayMSTFT(Fj[..., :10, :80, 0], name='source%d.pdf' % (j+1))
 
-        print 'source %d/%d: reconstructing waveform' % (j+1, pref['J'])
+        print 'component %d/%d: reconstructing waveform' % (j+1, pref['J'])
 
         # first compute back STFT
         yjstft = mstft.istft(
@@ -144,7 +146,7 @@ def process(signal, rate, pref, verbose=False, cluster=None, display=True):
         )
         # then waveform
         wavej = mstft.istft(
-            yjstft, fdim=1, hop=pref['thop'], shape=xwave.shape
+            yjstft, fdim=1, hop=pref['thop'], shape=signal.shape
         )
         estimates.append(wavej)
 
@@ -152,50 +154,3 @@ def process(signal, rate, pref, verbose=False, cluster=None, display=True):
     estimates = estimates[:, :signal.shape[0], ...]
 
     return estimates
-
-
-def export(input, input_file, output_path, samplerate, clusters=None):
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
-    basepath = os.path.join(
-        output_path, os.path.splitext(os.path.basename(input_file))[0]
-    )
-
-    if clusters:
-        k_str = 'src'
-    else:
-        k_str = 'cmpnt'
-
-    # Write out all components
-    for i in range(input.shape[0]):
-        sf.write(
-            input[i],
-            basepath + "_" + k_str + str(i) + ".wav",
-            samplerate
-        )
-
-    out_sum = np.sum(input, axis=0)
-    sf.write(out_sum, basepath + '_reconstruction.wav', samplerate)
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Source Separation based on Common Fate Model')
-
-    parser.add_argument('input', type=str, help='Input Audio File')
-
-    args = parser.parse_args()
-
-    # Parsing settings
-    with open("settings.yml", 'r') as f:
-        doc = yaml.load(f)
-
-    pref = doc['general']
-
-    filename = args.input
-
-    # loading signal
-    (xwave, fs) = sf.read(filename)
-
-    out = process(xwave, fs, pref)
-    export(out, filename, 'output', fs)
