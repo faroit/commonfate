@@ -12,8 +12,8 @@ if __name__ == "__main__":
         description='Common Fate Transform and Model',
 
         # Your contact information
-        author='Fabian-Robert Stoeter',
-        author_email='fabian-robert.stoeter@audiolabs-erlangen.de',
+        author='Antoine Liutkus',
+        author_email='antoine.liutkus@inria.fr',
 
         # License
         license='MIT',
