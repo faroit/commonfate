@@ -1,6 +1,5 @@
-import mstft
 import numpy as np
-from progressbar import ProgressBar, FormatLabel, Bar, ETA
+import tqdm
 import opt_einsum
 
 
@@ -103,9 +102,7 @@ class CFM(object):
                 )
             )
 
-        widgets = [FormatLabel('NTF Iteration %(value)d '), Bar(), ETA()]
-        progress = ProgressBar(widgets=widgets)
-        for it in progress(range(self.nb_iter)):
+        for it in tqdm.tqdm(range(self.nb_iter)):
             self.P *= MU('abftc,tj,cj->abfj', self.data, (self.At, self.Ac))
             self.At *= MU('abftc,abfj,cj->tj', self.data, (self.P, self.Ac))
             self.Ac *= MU('abftc,abfj,tj->cj', self.data, (self.P, self.At))

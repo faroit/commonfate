@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def _compute_size_by_dict(indices, idx_dict):
     """
     Computes the product of the elements in indices based on the dictionary
@@ -94,7 +95,7 @@ def _path_optimal(input_sets, output_set, idx_dict, memory_limit):
         comb_iter = []
         for x in range(len(input_sets) - iteration):
             for y in range(x + 1, len(input_sets) - iteration):
-                comb_iter.append((x,y))
+                comb_iter.append((x, y))
         for curr in current:
             cost, positions, remaining = curr
 
@@ -165,7 +166,7 @@ def _path_opportunistic(input_sets, output_set, idx_dict, memory_limit):
         comb_iter = []
         for x in range(len(input_sets)):
             for y in range(x + 1, len(input_sets)):
-                comb_iter.append((x,y))
+                comb_iter.append((x, y))
         for positions in comb_iter:
 
             contract = _find_contraction(positions, input_sets, output_set)

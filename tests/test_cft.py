@@ -1,5 +1,5 @@
 from __future__ import division
-from pycfm import cft
+from pycfm import transform
 import numpy
 import pytest
 import itertools
@@ -21,12 +21,12 @@ def signal(channels, length):
     return numpy.squeeze(numpy.random.random((length, channels)))
 
 
-@pytest.fixture(params=[1, 2, 4])
+@pytest.fixture(params=[1, 2])
 def framelength(request):
     return request.param * 512
 
 
-@pytest.fixture(params=[2, 4, 8])
+@pytest.fixture(params=[2, 4])
 def hopsize(framelength, request):
     return framelength // request.param
 
@@ -50,8 +50,8 @@ def test_2d(channels, signal, framelength, hopsize):
     x = signal
 
     # transform to spectogram
-    X = cft.stft(x, framelength, hopsize)
-    y = cft.istft(
+    X = transform.cft(x, framelength, hopsize)
+    y = transform.icft(
         X, fdim=1, hop=hopsize, shape=x.shape
     )
 
@@ -68,14 +68,14 @@ def test_grid(channels, signal, framelength, hopsize, W, mhop):
     x = signal
 
     # transform to spectogram
-    X = cft.stft(x, framelength, hopsize)
-    Z = cft.stft(X, W, mhop, real=False)
+    X = transform.cft(x, framelength, hopsize)
+    Z = transform.cft(X, W, mhop, real=False)
 
     # first compute back STFT
-    Y = cft.istft(
+    Y = transform.icft(
         Z, fdim=2, hop=mhop, shape=X.shape, real=False
     )
-    y = cft.istft(
+    y = transform.icft(
         Y, fdim=1, hop=hopsize, shape=x.shape
     )
 
