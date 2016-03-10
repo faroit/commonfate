@@ -1,5 +1,5 @@
 from __future__ import division
-import modules.mstft as mstft
+from pycfm import cft
 import numpy
 import pytest
 import itertools
@@ -50,8 +50,8 @@ def test_2d(channels, signal, framelength, hopsize):
     x = signal
 
     # transform to spectogram
-    X = mstft.stft(x, framelength, hopsize)
-    y = mstft.istft(
+    X = cft.stft(x, framelength, hopsize)
+    y = cft.istft(
         X, fdim=1, hop=hopsize, shape=x.shape
     )
 
@@ -68,14 +68,14 @@ def test_grid(channels, signal, framelength, hopsize, W, mhop):
     x = signal
 
     # transform to spectogram
-    X = mstft.stft(x, framelength, hopsize)
-    Z = mstft.stft(X, W, mhop, real=False)
+    X = cft.stft(x, framelength, hopsize)
+    Z = cft.stft(X, W, mhop, real=False)
 
     # first compute back STFT
-    Y = mstft.istft(
+    Y = cft.istft(
         Z, fdim=2, hop=mhop, shape=X.shape, real=False
     )
-    y = mstft.istft(
+    y = cft.istft(
         Y, fdim=1, hop=hopsize, shape=x.shape
     )
 

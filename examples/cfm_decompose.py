@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import cfm.decompose
+from pycfm import decompose
 import soundfile as sf
 import argparse
 import yaml
@@ -45,5 +45,5 @@ if __name__ == '__main__':
     # loading signal
     (audio, fs) = sf.read(filename, always_2d=True)
 
-    out = cfm.decompose.process(audio, fs, settings)
+    out = decompose.process(audio, fs)
     export(out, filename, 'output', fs)
