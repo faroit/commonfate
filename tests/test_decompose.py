@@ -6,16 +6,6 @@ import itertools
 import operator
 
 
-@pytest.fixture(params=[1, 2])
-def channels(request):
-    return request.param
-
-
-@pytest.fixture(params=[16000, 22050])
-def rate(request):
-    return request.param
-
-
 @pytest.fixture(params=[0.5])
 def length(rate, request):
     return request.param * rate
@@ -48,7 +38,14 @@ def mhop(W, request):
     return tuple(map(operator.floordiv, W, d))
 
 
-def test_reconstruction(channels, rate, signal, framelength, hopsize, W, mhop):
+@pytest.fixture(params=[16000, 22050])
+def rate(request):
+    return request.param
+
+
+def test_reconstruction(
+    channels, rate, signal, framelength, hopsize, W, mhop, opt_einsum
+):
     """
     Test if transform-inverse identity holds for the tensor case
     """
