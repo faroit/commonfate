@@ -6,11 +6,6 @@ import itertools
 import operator
 
 
-@pytest.fixture(params=[1, 2])
-def channels(request):
-    return request.param
-
-
 @pytest.fixture(params=[0.5, 1])
 def length(request):
     return request.param * 44100
