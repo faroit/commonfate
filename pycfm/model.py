@@ -1,13 +1,16 @@
 import numpy as np
 import tqdm
-import opt_einsum
+try:
+    from opt_einsum import contract as einsum
+except ImportError:
+    from numpy import einsum
 
 
 def hat(P, At, Ac, eps=None):
     if eps is None:
         eps = np.finfo(float).eps
 
-    return eps + opt_einsum.contract('abfj,tj,cj->abftc', P, At, Ac)
+    return eps + einsum('abfj,tj,cj->abftc', P, At, Ac)
 
 
 def nnrandn(shape):
@@ -91,11 +94,11 @@ class CFM(object):
         def MU(einsumString, Z, factors):
             Zhat = hat(self.P, self.At, self.Ac)
             return (
-                opt_einsum.contract(
+                einsum(
                     einsumString,
                     self.data * (Zhat ** (self.beta - 2)),
                     *factors) /
-                opt_einsum.contract(
+                einsum(
                     einsumString,
                     Zhat ** (self.beta - 1),
                     *factors
