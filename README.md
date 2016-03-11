@@ -1,8 +1,8 @@
 # _Common Fate Model_ for Audio Source Separation
 
-[![Build Status](https://travis-ci.org/faroit/cfm.svg?branch=master)](https://travis-ci.org/faroit/cfm)
+[![Build Status](https://travis-ci.org/aliutkus/cfm.svg?branch=master)](https://travis-ci.org/aliutkus/cfm)
 
-This package is a python implementation of the _common fate transform and model_ as described in [this paper]([here](https://hal.archives-ouvertes.fr/hal-01248012/file/common_fate_icassp2016.pdf).
+This package is a python implementation of the _common fate transform and model_ as described in [this paper](https://hal.archives-ouvertes.fr/hal-01248012/file/common_fate_icassp2016.pdf).
 
 ### Common Fate Transform
 
