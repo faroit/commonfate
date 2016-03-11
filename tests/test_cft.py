@@ -6,12 +6,12 @@ import itertools
 import operator
 
 
-@pytest.fixture(params=[1, 2, 4])
+@pytest.fixture(params=[1, 2])
 def channels(request):
     return request.param
 
 
-@pytest.fixture(params=[1, 2])
+@pytest.fixture(params=[0.5, 1])
 def length(request):
     return request.param * 44100
 
@@ -67,14 +67,15 @@ def test_grid(channels, signal, framelength, hopsize, W, mhop):
     """
     x = signal
 
-    # transform to spectogram
+    # transform to spectrogram
     X = transform.cft(x, framelength, hopsize)
     Z = transform.cft(X, W, mhop, real=False)
 
-    # first compute back STFT
+    # first compute STFT
     Y = transform.icft(
         Z, fdim=2, hop=mhop, shape=X.shape, real=False
     )
+    # then back to time domain
     y = transform.icft(
         Y, fdim=1, hop=hopsize, shape=x.shape
     )

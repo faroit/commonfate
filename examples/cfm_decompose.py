@@ -17,7 +17,7 @@ def export(input, input_file, output_path, samplerate):
     # Write out all components
     for i in range(input.shape[0]):
         sf.write(
-            basepath + "_src" + str(i) + ".wav",
+            basepath + "_cpnt-" + str(i) + ".wav",
             input[i],
             samplerate
         )
@@ -34,16 +34,20 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Parsing settings
-    with open("settings.yml", 'r') as f:
-        doc = yaml.load(f)
-
-    settings = doc['general']
-
     filename = args.input
 
     # loading signal
     (audio, fs) = sf.read(filename, always_2d=True)
 
-    out = decompose.process(audio, fs)
+    out = decompose.process(
+        audio,
+        fs,
+        nb_iter=100,
+        nb_components=2,
+        n_fft=1024,
+        n_hop=512,
+        cft_patch=(64, 32),
+        cft_hop=(32, 16)
+    )
+
     export(out, filename, 'output', fs)
