@@ -7,7 +7,7 @@ def hat(P, At, Ac, eps=None):
     if eps is None:
         eps = np.finfo(float).eps
 
-    return eps+opt_einsum.contract('abfj,tj,cj->abftc', P, At, Ac)
+    return eps + opt_einsum.contract('abfj,tj,cj->abftc', P, At, Ac)
 
 
 def nnrandn(shape):
