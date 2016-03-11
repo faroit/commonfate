@@ -3,7 +3,7 @@ import setuptools
 if __name__ == "__main__":
     setuptools.setup(
         # Name of the project
-        name='pycfm',
+        name='commonfate',
 
         # Version
         version="0.1.0",

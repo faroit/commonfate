@@ -1,6 +1,36 @@
 # _Common Fate Model_ for Audio Source Separation
 
-[![Build Status](https://travis-ci.org/faroit/pyCFM.svg?branch=master)](https://travis-ci.org/faroit/pyCFM)
+[![Build Status](https://travis-ci.org/faroit/cfm.svg?branch=master)](https://travis-ci.org/faroit/cfm)
+
+This package is a python implementation of the _common fate transform and model_ as described in [this paper]([here](https://hal.archives-ouvertes.fr/hal-01248012/file/common_fate_icassp2016.pdf).
+
+### Common Fate Transform
+
+The Common Fate Transform is based on a signal representation that divides a complex spectrogram into a grid of patches of arbitrary size. These complex patches are then processed by a two-dimensional discrete Fourier transform, forming a tensor representation which reveals spectral and temporal modulation textures.
+
+### Common Fate Model
+
+An adapted factorization model similar to the PARAFAC/CANDECOMP factorisation allows to decompose the _common fate transform_ tesnor into different time-varying harmonic sources based on their particular common modulation profile: hence the name Common Fate Model.
+
+## Usage
+
+```python
+import commonfate
+
+# forward transform
+X = commonfate.transform.forward(signal, framelength, hopsize)
+Z = commonfate.transform.forward(X, W, mhop, real=False)
+
+# inverse transform of cft
+Y = commonfate.transform.inverse(
+    Z, fdim=2, hop=mhop, shape=X.shape, real=False
+)
+# back to time domain
+y = commonfate.transform.inverse(
+    Y, fdim=1, hop=hopsize, shape=x.shape
+)
+
+```
 
 ## Optimisations
 
@@ -12,7 +42,7 @@ The current common fate model implementation makes heavily use of the [Einstein 
 pip install -e 'git+https://github.com/dgasmith/opt_einsum.git#egg=opt_einsum'
 ```
 
-_PyCFM_ automatically detects if the package is installed.
+_commonfate_ automatically detects if the package is installed.
 
 ## References
 

@@ -16,13 +16,13 @@ def process(
     nb_iter=100
 ):
 
-    xstft = transform.cft(
+    xstft = transform.forward(
         signal,
         n_fft,
         n_hop,
     )
 
-    xcft = transform.cft(
+    xcft = transform.forward(
         xstft,
         cft_patch,
         cft_hop,
@@ -52,11 +52,11 @@ def process(
         yj = Fj / xcft_hat * xcft
 
         # first compute back STFT
-        yjstft = transform.icft(
+        yjstft = transform.inverse(
             yj, fdim=2, hop=cft_hop, shape=xstft.shape, real=False
         )
         # then waveform
-        wavej = transform.icft(
+        wavej = transform.inverse(
             yjstft, fdim=1, hop=n_hop, shape=signal.shape
         )
         estimates.append(wavej)

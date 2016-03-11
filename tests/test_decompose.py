@@ -1,5 +1,5 @@
 from __future__ import division
-from pycfm import decompose
+import commonfate as cf
 import numpy as np
 import pytest
 import itertools
@@ -49,7 +49,7 @@ def test_reconstruction(
     """
     Test if transform-inverse identity holds for the tensor case
     """
-    components = decompose.process(
+    components = cf.decompose.process(
         signal,
         rate,
         nb_iter=50,

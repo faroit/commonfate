@@ -263,7 +263,7 @@ def overlapadd(S, fdim, hop, shape=None, weightedFrames=True, verbose=False):
     return sig
 
 
-def cft(sig, frameShape, hop, real=True, verbose=False):
+def forward(sig, frameShape, hop, real=True, verbose=False):
     """Common Fate Transorm
     based on a n-dimenional STFT (Short Time Fourier Transform)
 
@@ -294,7 +294,7 @@ def cft(sig, frameShape, hop, real=True, verbose=False):
     return stft
 
 
-def icft(S, fdim, hop, real=True, shape=None, single=False, verbose=False):
+def inverse(S, fdim, hop, real=True, shape=None, single=False, verbose=False):
     """Inverse Common Fate Transform
     S    : ndarray containing the stft to be inverted
     fdim : the number of dimensions in S corresponding to

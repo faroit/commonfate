@@ -1,5 +1,5 @@
 from __future__ import division
-from pycfm import transform
+import commonfate
 import numpy
 import pytest
 import itertools
@@ -45,8 +45,8 @@ def test_2d(channels, signal, framelength, hopsize):
     x = signal
 
     # transform to spectogram
-    X = transform.cft(x, framelength, hopsize)
-    y = transform.icft(
+    X = commonfate.transform.forward(x, framelength, hopsize)
+    y = commonfate.transform.inverse(
         X, fdim=1, hop=hopsize, shape=x.shape
     )
 
@@ -63,15 +63,15 @@ def test_grid(channels, signal, framelength, hopsize, W, mhop):
     x = signal
 
     # transform to spectrogram
-    X = transform.cft(x, framelength, hopsize)
-    Z = transform.cft(X, W, mhop, real=False)
+    X = commonfate.transform.forward(x, framelength, hopsize)
+    Z = commonfate.transform.forward(X, W, mhop, real=False)
 
     # first compute STFT
-    Y = transform.icft(
+    Y = commonfate.transform.inverse(
         Z, fdim=2, hop=mhop, shape=X.shape, real=False
     )
     # then back to time domain
-    y = transform.icft(
+    y = commonfate.transform.inverse(
         Y, fdim=1, hop=hopsize, shape=x.shape
     )
 

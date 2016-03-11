@@ -7,7 +7,7 @@ import sys
 import numpy as np
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
-from pycfm import transform
+from commonfate import transform
 import argparse
 import soundfile as sf
 

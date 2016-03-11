@@ -1,9 +1,9 @@
 import os
 import numpy as np
-from pycfm import decompose
 import soundfile as sf
 import argparse
 import yaml
+from commonfate import decompose
 
 
 def export(input, input_file, output_path, samplerate):
