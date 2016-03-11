@@ -11,7 +11,7 @@ def channels(request):
     return request.param
 
 
-@pytest.fixture(params=[16000, 44100])
+@pytest.fixture(params=[16000, 22050])
 def rate(request):
     return request.param
 
@@ -55,7 +55,7 @@ def test_reconstruction(channels, rate, signal, framelength, hopsize, W, mhop):
     components = decompose.process(
         signal,
         rate,
-        nb_iter=100,
+        nb_iter=50,
         nb_components=2,
         n_fft=framelength,
         n_hop=hopsize,
@@ -68,4 +68,4 @@ def test_reconstruction(channels, rate, signal, framelength, hopsize, W, mhop):
 
     # testing reconstruction error
     error = np.sqrt(np.mean((np.sum(components, axis=0) - signal) ** 2))
-    assert error < 0.1
+    assert error < 1e-8

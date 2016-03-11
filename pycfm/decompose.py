@@ -51,16 +51,14 @@ def process(
 
         yj = Fj / xcft_hat * xcft
 
-    # first compute back STFT
-    yjstft = transform.icft(
-        yj, fdim=2, hop=cft_hop, shape=xstft.shape, real=False
-    )
-    # then waveform
-    wavej = transform.icft(
-        yjstft, fdim=1, hop=n_hop, shape=signal.shape
-    )
-    estimates.append(wavej)
+        # first compute back STFT
+        yjstft = transform.icft(
+            yj, fdim=2, hop=cft_hop, shape=xstft.shape, real=False
+        )
+        # then waveform
+        wavej = transform.icft(
+            yjstft, fdim=1, hop=n_hop, shape=signal.shape
+        )
+        estimates.append(wavej)
 
-    estimates = np.array(estimates)
-
-    return estimates
+    return np.array(estimates)

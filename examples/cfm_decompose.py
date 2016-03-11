@@ -42,12 +42,12 @@ if __name__ == '__main__':
     out = decompose.process(
         audio,
         fs,
-        nb_iter=100,
+        nb_iter=10,
         nb_components=2,
         n_fft=1024,
-        n_hop=512,
-        cft_patch=(64, 32),
-        cft_hop=(32, 16)
+        n_hop=256,
+        cft_patch=(32, 48),
+        cft_hop=(16, 24)
     )
 
     export(out, filename, 'output', fs)
