@@ -12,6 +12,8 @@ The Common Fate Transform is based on a signal representation that divides a com
 
 An adapted factorization model similar to the PARAFAC/CANDECOMP factorisation allows to decompose the _common fate transform_ tesnor into different time-varying harmonic sources based on their particular common modulation profile: hence the name Common Fate Model.
 
+![cfm](https://cloud.githubusercontent.com/assets/72940/13718782/b1a331e4-e7ed-11e5-9612-0cacd6fe34a9.png)
+
 ## Usage
 
 ```python
