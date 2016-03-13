@@ -44,14 +44,13 @@ def rate(request):
 
 
 def test_reconstruction(
-    channels, rate, signal, framelength, hopsize, W, mhop, opt_einsum
+    channels, signal, framelength, hopsize, W, mhop, opt_einsum
 ):
     """
     Test if transform-inverse identity holds for the tensor case
     """
     components = cf.decompose.process(
         signal,
-        rate,
         nb_iter=50,
         nb_components=2,
         n_fft=framelength,

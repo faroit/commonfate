@@ -6,7 +6,6 @@ import numpy as np
 
 def process(
     signal,
-    rate,
     n_fft=1024,
     n_hop=512,
     cft_patch=(10, 10),

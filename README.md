@@ -16,6 +16,8 @@ An adapted factorization model similar to the PARAFAC/CANDECOMP factorisation al
 
 ## Usage
 
+### Applying the Common Fate Transform
+
 ```python
 import commonfate
 
@@ -32,6 +34,56 @@ y = commonfate.transform.inverse(
     Y, fdim=1, hop=hopsize, shape=x.shape
 )
 
+```
+
+### Fitting the Common Fate Model
+
+```python
+import commonfate
+
+# initialiase and fit the common fate model
+cfm = commonfate.model.CFM(z, nb_iter=100, nb_components=10).fit()
+
+# get the fitted factors
+(P, At, Ac) = cfm.factors
+
+# returns the of z approximation using the fitted factors
+z_hat = cfm.approx
+```
+
+### Decompose an audio signal using CFT and CFM
+
+_commonfate_ has a built-in wrapper which computes the _Common Fate Transform_,
+fits the model according to the _Common Fate Model_ and return the synthesised
+time domain signal components obtained through wiener / soft mask filtering.
+
+The following example requires to install [pysoundfile](https://github.com/bastibe/PySoundFile).
+
+```python
+import commonfate
+import soundfile as sf
+
+# loading signal
+(audio, fs) = sf.read(filename, always_2d=True)
+
+# decomposes the audio signal into
+# (nb_components, nb_samples, nb_channels)
+components = decompose.process(
+    audio,
+    nb_iter=100,
+    nb_components=10,
+    n_fft=1024,
+    n_hop=256,
+    cft_patch=(32, 48),
+    cft_hop=(16, 24)
+)
+
+# write out the third component to wave file
+sf.write(
+    "component_3.wav",
+    components[2, ...],
+    fs
+)
 ```
 
 ## Optimisations

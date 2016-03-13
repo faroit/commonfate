@@ -41,7 +41,6 @@ if __name__ == '__main__':
 
     out = decompose.process(
         audio,
-        fs,
         nb_iter=10,
         nb_components=2,
         n_fft=1024,
