@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import scipy.fftpack
 
 
 def split(sig, frameShape, hop, weightFrames=True, verbose=False):
@@ -289,7 +290,7 @@ def forward(sig, frameShape, hop, real=True, verbose=False):
     if real:
         fftFunction = np.fft.rfftn
     else:
-        fftFunction = np.fft.fftn
+        fftFunction = scipy.fftpack.fftn
     stft = fftFunction(stft, frameShape, axes=range(len(frameShape)))
     return stft
 
@@ -322,7 +323,7 @@ def inverse(S, fdim, hop, real=True, shape=None, single=False, verbose=False):
             typeSig = 'complex64'
         else:
             typeSig = 'complex128'
-        ifftFunction = np.fft.ifftn
+        ifftFunction = scipy.fftpack.ifftn
 
     # before overlap-add, we apply the ifft function.
     # We do this now for the speed of calling it only once, but I've
