@@ -7,7 +7,7 @@ import sys
 import numpy as np
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
-from commonfate import transform
+import commonfate
 import argparse
 import soundfile as sf
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     (xwave, fs) = sf.read(args.input)
 
     print 'computing CFT'
-    x_cft = transform.cft(xwave, nfft, thop)
+    x_cft = commonfate.transform.forward(xwave, nfft, thop)
 
     app = QtGui.QApplication([])
 

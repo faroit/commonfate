@@ -4,8 +4,7 @@ import itertools
 import soundfile as sf
 import argparse
 import seaborn as sns
-import matplotlib as mpl
-from commonfate import transform
+import commonfate
 
 
 def displaySTFT(X, name=None):
@@ -67,9 +66,11 @@ if __name__ == '__main__':
     # loading signal
     (audio, fs) = sf.read(filename, always_2d=True)
 
-    x_stft = transform.forward(audio, 1024, 512)
+    x_stft = commonfate.transform.forward(audio, 1024, 512)
 
-    x_cft = transform.forward(x_stft, (64, 32), (32, 16), real=False)
+    x_cft = commonfate.transform.forward(
+        x_stft, (64, 32), (32, 16), real=False
+    )
 
     print 'getting modulation spectrogram, shape:', x_cft.shape
     z_cft = np.abs(x_cft)

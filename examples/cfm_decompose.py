@@ -2,7 +2,6 @@ import os
 import numpy as np
 import soundfile as sf
 import argparse
-import yaml
 from commonfate import decompose
 
 
