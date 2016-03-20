@@ -6,11 +6,13 @@ This package is a python implementation of the _Common Fate Transform and Model_
 
 ### Common Fate Transform
 
-![cfm](https://cloud.githubusercontent.com/assets/72940/13906318/5de230a0-ef0e-11e5-8447-3a2f1600a22a.png)
+![cft](https://cloud.githubusercontent.com/assets/72940/13906318/5de230a0-ef0e-11e5-8447-3a2f1600a22a.png)
 
 The Common Fate Transform is based on a signal representation that divides a complex spectrogram into a grid of patches of arbitrary size. These complex patches are then processed by a two-dimensional discrete Fourier transform, forming a tensor representation which reveals spectral and temporal modulation textures.
 
 ### Common Fate Model
+
+![cfm](https://cloud.githubusercontent.com/assets/72940/13906456/402211d6-ef11-11e5-8103-12944f5404f4.png)
 
 An adapted factorization model similar to the PARAFAC/CANDECOMP factorisation allows to decompose the _common fate transform_ tesnor into different time-varying harmonic sources based on their particular common modulation profile: hence the name Common Fate Model.
 
