@@ -5,15 +5,24 @@ import scipy.fftpack
 
 def split(sig, frameShape, hop, weightFrames=True, verbose=False):
     """splits a ndarray into overlapping frames
+
     sig : ndarray
-    frameShape : tuple giving the size of each frame. If its shape is
-                 smaller than that of sig, assume the frame is of size 1
-                 for all missing dimensions
-    hop : tuple giving the hopsize in each dimension. If its shape is
-          smaller than that of sig, assume the hopsize is 1 for all
-          missing dimensions
-    weightFrames : return frames weighted by a ND hamming window
-    verbose : whether to output progress during computation"""
+
+    frameShape : tuple
+        giving the size of each frame. If its shape is
+        smaller than that of sig, assume the frame is of size 1
+        for all missing dimensions
+
+    hop : tuple
+        giving the hopsize in each dimension. If its shape is
+        smaller than that of sig, assume the hopsize is 1 for all
+        missing dimensions
+
+    weightFrames : bool
+        return frames weighted by a ND hamming window
+
+    verbose : bool
+        whether to output progress during computation"""
 
     # signal shape
     sigShape = np.array(sig.shape)
@@ -131,17 +140,28 @@ def split(sig, frameShape, hop, weightFrames=True, verbose=False):
 
 def overlapadd(S, fdim, hop, shape=None, weightedFrames=True, verbose=False):
     """n-dimensional overlap-add
-    S    : ndarray containing the stft to be inverted
-    fdim : the number of dimensions in S corresponding to
-           frame indices.
-    hop  : tuple containing hopsizes along dimensions.
-           Missing hopsizes are assumed to be 1
-    shape: Indicating the original shape of the
-           signal for truncating. If None: no truncating is done
-    weightedFrames: True if we need to compensate for the analysis weighting
-                    (weightFrames of the split function)
-    verbose: whether or not to display progress
-            """
+    S : ndarray
+        containing the stft to be inverted
+
+    fdim : int
+        the number of dimensions in S corresponding to
+        frame indices.
+
+    hop : tuple
+        containing hopsizes along dimensions.
+        Missing hopsizes are assumed to be 1
+
+    shape : tuple
+        Indicating the original shape of the
+        signal for truncating. If None: no truncating is done
+
+    weightedFrames : bool
+        True if we need to compensate for the analysis weighting
+        (weightFrames of the split function)
+
+    verbose : bool
+        whether or not to display progress
+    """
 
     # number of dimensions
     nDim = len(S.shape)
@@ -265,19 +285,29 @@ def overlapadd(S, fdim, hop, shape=None, weightedFrames=True, verbose=False):
 
 
 def forward(sig, frameShape, hop, real=True, verbose=False):
-    """Common Fate Transorm
+    """Common Fate Transform
     based on a n-dimenional STFT (Short Time Fourier Transform)
 
     sig : ndarray
-    frameShape : tuple giving the size of each frame. If its shape is
-                 smaller than that of sig, assume the frame is of size 1
-                 for all missing dimensions
-    hop : tuple giving the hopsize in each dimension. If its shape is
-          smaller than that of sig, assume the hopsize is 1 for all
-          missing dimensions
-    real: if True, use rfft (discard negative frequencies), if False, use
-          fft
-    verbose : whether to output progress during computation"""
+        input signal
+
+    frameShape : tuple
+        giving the size of each frame. If its shape is
+        smaller than that of sig, assume the frame is of size 1
+        for all missing dimensions
+
+    hop : tuple
+        giving the hopsize in each dimension. If its shape is
+        smaller than that of sig, assume the hopsize is 1 for all
+        missing dimensions
+
+    real: bool
+        if True, use rfft (discard negative frequencies), if False, use
+        fft
+
+    verbose : bool
+        whether to output progress during computation"""
+
     if np.isscalar(frameShape):
         frameShape = (frameShape,)
     stft = split(sig, frameShape, hop, True, verbose)
@@ -297,19 +327,32 @@ def forward(sig, frameShape, hop, real=True, verbose=False):
 
 def inverse(S, fdim, hop, real=True, shape=None, single=False, verbose=False):
     """Inverse Common Fate Transform
-    S    : ndarray containing the stft to be inverted
-    fdim : the number of dimensions in S corresponding to
-           frequency indices.
-    hop  : tuple containing hopsizes along dimensions.
-           Missing hopsizes are assumed to be 1
-    real : if True, using irfft, if False, using ifft
-    shape: Indicating the original shape of the
-           signal for truncating. If None: no truncating is done
-    single: if True, single precision
-    verbose: whether or not to display progress
 
+    S : ndarray
+        containing the stft to be inverted
 
-            """
+    fdim : int
+        the number of dimensions in S corresponding to
+        frequency indices.
+
+    hop : tuple
+        containing hopsizes along dimensions.
+        Missing hopsizes are assumed to be 1
+
+    real : bool
+        if True, using irfft, if False, using ifft
+
+    shape : tuple
+        Indicating the original shape of the
+        signal for truncating. If None: no truncating is done
+
+    single : bool
+        if True, single precision
+
+    verbose : bool
+        whether or not to display progress
+
+    """
 
     # alocating memory for stft
     if real:

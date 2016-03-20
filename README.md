@@ -42,13 +42,13 @@ y = commonfate.transform.inverse(
 import commonfate
 
 # initialiase and fit the common fate model
-cfm = commonfate.model.CFM(z, nb_iter=100, nb_components=10).fit()
+cfm = commonfate.model.CFM(z, nb_components=10, nb_iter=100).fit()
 
 # get the fitted factors
 (P, At, Ac) = cfm.factors
 
 # returns the of z approximation using the fitted factors
-z_hat = cfm.approx
+z_hat = cfm.approx()
 ```
 
 ### Decompose an audio signal using CFT and CFM

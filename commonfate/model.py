@@ -7,6 +7,23 @@ except ImportError:
 
 
 def hat(P, At, Ac, eps=None):
+    """Builds common fate model tensor from factors
+    makes use of numpys einstein summation
+
+    Parameters
+    ----------
+    P : tuple
+        The shape
+    At : tuple
+        The shape
+    Ac : tuple
+        The shape
+
+    Returns
+    -------
+    np.ndarray, shape=(P.shape + At.shape + Ac.shape)
+        tensor with same shape as common fate transform
+    """
     if eps is None:
         eps = np.finfo(float).eps
 
@@ -23,7 +40,7 @@ def nnrandn(shape):
 
     Returns
     -------
-    out : array of given shape
+    out : ndarray
         The non-negative random numbers
     """
     return np.abs(np.random.randn(*shape))
@@ -33,18 +50,25 @@ class CFM(object):
     """The Common Fate model
     Vj(a,b,f,t,c) = P(a,b,f,j)At(t,j)Ac(c,j)
 
-    So we have one modulation texture "shape" for each frequency,
+    Factorises one modulation texture P for each frequency,
     hence P(a,b,f,j) which is activated over time, this is At(t,j) and over
-    channels, this is Ac(c,j)
+    channels Ac(c,j)
 
     Parameters
-    ---------
-    data_shape : iterable
-        A tuple of integers representing the shape of the
-        data to approximate
-    n_components : int > 0
-        the number of latent components for the NTF model
+    ----------
+
+    data : Data input tensor of shape (a, b, f, t, c)
+        (a, b): Patch Dimension
+        (f, t): Patch frequency and time index
+        (c,): Channel
+
+    nb_components : int > 0
+        the number of latent components for the CFM model
         positive integer
+
+    nb_iter : int, opt
+        number of iterations
+
     beta : float
         The beta-divergence to use. An arbitrary float, but not
         that non-small integer values will significantly slow the
@@ -53,6 +77,25 @@ class CFM(object):
          * beta=2 : Euclidean distance
          * beta=1 : Kullback Leibler
          * beta=0 : Itakura-Saito
+
+    P : ndarray, optional
+        initialisation of P. Defaults to `none`,
+        results in random initialisation. shape=(a, b, f, j)
+
+    At : ndarray, optional
+        initialisation of At. Defaults to `none`,
+        results in random initialisation. shape=(t, j)
+
+    Ac : ndarray, optional
+        initialisation of Ac. Defaults to `none`,
+        results in random initialisation. shape=(c, j)
+
+    Methods
+    -------
+    fit()
+        Fits the model to the given data using `nb_iter` iterations
+        returns ``CFM`` model
+
     """
     def __init__(
         self,
@@ -72,27 +115,29 @@ class CFM(object):
 
         # Factorisation Parameters
         if P is None:
-            self.P = nnrandn(self.data.shape[:3] + (nb_components,))
+            self._P = nnrandn(self.data.shape[:3] + (nb_components,))
         else:
-            self.P = P
+            self._P = P
 
         if At is None:
-            self.At = nnrandn((self.data.shape[3], nb_components))
+            self._At = nnrandn((self.data.shape[3], nb_components))
         else:
-            self.At = At
+            self._At = At
 
         if Ac is None:
-            self.Ac = nnrandn((self.data.shape[4], nb_components))
+            self._Ac = nnrandn((self.data.shape[4], nb_components))
         else:
-            self.Ac = Ac
+            self._Ac = Ac
 
     def fit(self):
         """fits a common fate model to
         Z(a,b,f,t,i) = P(a,b,j)Af(f,j)At(t,j)Ac(i,j)
+
+        returns ``CFM`` model
         """
 
         def MU(einsumString, Z, factors):
-            Zhat = hat(self.P, self.At, self.Ac)
+            Zhat = hat(self._P, self._At, self._Ac)
             return (
                 einsum(
                     einsumString,
@@ -106,16 +151,25 @@ class CFM(object):
             )
 
         for it in tqdm.tqdm(range(self.nb_iter)):
-            self.P *= MU('abftc,tj,cj->abfj', self.data, (self.At, self.Ac))
-            self.At *= MU('abftc,abfj,cj->tj', self.data, (self.P, self.Ac))
-            self.Ac *= MU('abftc,abfj,tj->cj', self.data, (self.P, self.At))
+            self._P *= MU('abftc,tj,cj->abfj', self.data, (self._At, self._Ac))
+            self._At *= MU('abftc,abfj,cj->tj', self.data, (self._P, self._Ac))
+            self._Ac *= MU('abftc,abfj,tj->cj', self.data, (self._P, self._At))
 
         return self
 
     @property
     def factors(self):
-        return (self.P, self.At, self.Ac)
+        """
+        Returns Common Fate factors
 
-    @property
+        :type: tuple
+        """
+        return (self._P, self._At, self._Ac)
+
     def approx(self):
-        return hat(self.P, self.At, self.Ac)
+        """
+        Builds Common Fate tensor from fitted model
+
+        returns ndarray, shape=(a, b, f, t, c)
+        """
+        return hat(self._P, self._At, self._Ac)
