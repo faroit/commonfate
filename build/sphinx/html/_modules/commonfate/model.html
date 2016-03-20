@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>commonfate.model &mdash; commonfate 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="commonfate 0.1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> commonfate
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../commonfate.transform.html">Common Fate Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commonfate.model.html">Common Fate Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commonfate.decompose.html">Decompose Audio</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">commonfate</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>commonfate.model</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for commonfate.model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">opt_einsum</span> <span class="kn">import</span> <span class="n">contract</span> <span class="k">as</span> <span class="n">einsum</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">einsum</span>
+
+
+<div class="viewcode-block" id="hat"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.hat">[docs]</a><span class="k">def</span> <span class="nf">hat</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">Ac</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds common fate model tensor from factors</span>
+<span class="sd">    makes use of numpys einstein summation</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    P : tuple</span>
+<span class="sd">        The shape</span>
+<span class="sd">    At : tuple</span>
+<span class="sd">        The shape</span>
+<span class="sd">    Ac : tuple</span>
+<span class="sd">        The shape</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray, shape=(P.shape + At.shape + Ac.shape)</span>
+<span class="sd">        tensor with same shape as common fate transform</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">eps</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+    <span class="k">return</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;abfj,tj,cj-&gt;abftc&#39;</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">Ac</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="nnrandn"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.nnrandn">[docs]</a><span class="k">def</span> <span class="nf">nnrandn</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;generates randomly a nonnegative ndarray of given shape</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shape : tuple</span>
+<span class="sd">        The shape</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : ndarray</span>
+<span class="sd">        The non-negative random numbers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CFM"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.CFM">[docs]</a><span class="k">class</span> <span class="nc">CFM</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The Common Fate model</span>
+<span class="sd">    Vj(a,b,f,t,c) = P(a,b,f,j)At(t,j)Ac(c,j)</span>
+
+<span class="sd">    Factorises one modulation texture P for each frequency,</span>
+<span class="sd">    hence P(a,b,f,j) which is activated over time, this is At(t,j) and over</span>
+<span class="sd">    channels Ac(c,j)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    data : Data input tensor of shape (a, b, f, t, c)</span>
+<span class="sd">        (a, b): Patch Dimension</span>
+<span class="sd">        (f, t): Patch frequency and time index</span>
+<span class="sd">        (c,): Channel</span>
+
+<span class="sd">    nb_components : int &gt; 0</span>
+<span class="sd">        the number of latent components for the CFM model</span>
+<span class="sd">        positive integer</span>
+
+<span class="sd">    nb_iter : int, opt</span>
+<span class="sd">        number of iterations</span>
+
+<span class="sd">    beta : float</span>
+<span class="sd">        The beta-divergence to use. An arbitrary float, but not</span>
+<span class="sd">        that non-small integer values will significantly slow the</span>
+<span class="sd">        calculation down. Particular cases of interest are:</span>
+
+<span class="sd">         * beta=2 : Euclidean distance</span>
+<span class="sd">         * beta=1 : Kullback Leibler</span>
+<span class="sd">         * beta=0 : Itakura-Saito</span>
+
+<span class="sd">    P : ndarray, optional</span>
+<span class="sd">        initialisation of P. Defaults to `none`,</span>
+<span class="sd">        results in random initialisation. shape=(a, b, f, j)</span>
+
+<span class="sd">    At : ndarray, optional</span>
+<span class="sd">        initialisation of At. Defaults to `none`,</span>
+<span class="sd">        results in random initialisation. shape=(t, j)</span>
+
+<span class="sd">    Ac : ndarray, optional</span>
+<span class="sd">        initialisation of Ac. Defaults to `none`,</span>
+<span class="sd">        results in random initialisation. shape=(c, j)</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    fit()</span>
+<span class="sd">        Fits the model to the given data using `nb_iter` iterations</span>
+<span class="sd">        returns ``CFM`` model</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">nb_components</span><span class="p">,</span>
+        <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">P</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">At</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">Ac</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># General fitting parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_components</span> <span class="o">=</span> <span class="n">nb_components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_iter</span> <span class="o">=</span> <span class="n">nb_iter</span>
+
+        <span class="c1"># Factorisation Parameters</span>
+        <span class="k">if</span> <span class="n">P</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">nb_components</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">=</span> <span class="n">P</span>
+
+        <span class="k">if</span> <span class="n">At</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_At</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">nb_components</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_At</span> <span class="o">=</span> <span class="n">At</span>
+
+        <span class="k">if</span> <span class="n">Ac</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">nb_components</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span> <span class="o">=</span> <span class="n">Ac</span>
+
+<div class="viewcode-block" id="CFM.fit"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.CFM.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;fits a common fate model to</span>
+<span class="sd">        Z(a,b,f,t,i) = P(a,b,j)Af(f,j)At(t,j)Ac(i,j)</span>
+
+<span class="sd">        returns ``CFM`` model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">MU</span><span class="p">(</span><span class="n">einsumString</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">factors</span><span class="p">):</span>
+            <span class="n">Zhat</span> <span class="o">=</span> <span class="n">hat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">einsum</span><span class="p">(</span>
+                    <span class="n">einsumString</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="p">(</span><span class="n">Zhat</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)),</span>
+                    <span class="o">*</span><span class="n">factors</span><span class="p">)</span> <span class="o">/</span>
+                <span class="n">einsum</span><span class="p">(</span>
+                    <span class="n">einsumString</span><span class="p">,</span>
+                    <span class="n">Zhat</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="o">*</span><span class="n">factors</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_iter</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,tj,cj-&gt;abfj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_At</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,abfj,cj-&gt;tj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,abfj,tj-&gt;cj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">factors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns Common Fate factors</span>
+
+<span class="sd">        :type: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CFM.approx"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.CFM.approx">[docs]</a>    <span class="k">def</span> <span class="nf">approx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds Common Fate tensor from fitted model</span>
+
+<span class="sd">        returns ndarray, shape=(a, b, f, t, c)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">hat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Antoine Liutkus.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: commonfate
+Version: 0.1.0
+Summary: Common Fate Transform and Model
+Home-page: UNKNOWN
+Author: Antoine Liutkus
+Author-email: antoine.liutkus@inria.fr
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Environment :: Plugins
+Classifier: Intended Audience :: Telecommunications Industry
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Multimedia :: Sound/Audio :: Analysis
+Classifier: Topic :: Multimedia :: Sound/Audio :: Sound SynthesisTopic :: Scientific/Engineering :: Information Analysis

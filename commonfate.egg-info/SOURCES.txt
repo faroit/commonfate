@@ -1,0 +1,12 @@
+setup.cfg
+commonfate/__init__.py
+commonfate/decompose.py
+commonfate/model.py
+commonfate/transform.py
+commonfate.egg-info/PKG-INFO
+commonfate.egg-info/SOURCES.txt
+commonfate.egg-info/dependency_links.txt
+commonfate.egg-info/not-zip-safe
+commonfate.egg-info/pbr.json
+commonfate.egg-info/requires.txt
+commonfate.egg-info/top_level.txt

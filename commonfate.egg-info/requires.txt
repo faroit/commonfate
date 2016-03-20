@@ -1,0 +1,13 @@
+numpy>=1.7
+scipy>=0.9
+tqdm
+
+[docs]
+sphinx
+sphinx_rtd_theme
+numpydoc
+
+[tests]
+pytest
+pytest-cov
+pytest-pep8

@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Common Fate Transform &mdash; commonfate 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="commonfate 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Common Fate Model" href="commonfate.model.html"/>
+        <link rel="prev" title="Common Fate Model and Transform" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> commonfate
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Common Fate Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonfate.model.html">Common Fate Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonfate.decompose.html">Decompose Audio</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">commonfate</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Common Fate Transform</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/commonfate.transform.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-commonfate.transform">
+<span id="common-fate-transform"></span><h1>Common Fate Transform<a class="headerlink" href="#module-commonfate.transform" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="commonfate.transform.forward">
+<code class="descclassname">commonfate.transform.</code><code class="descname">forward</code><span class="sig-paren">(</span><em>sig</em>, <em>frameShape</em>, <em>hop</em>, <em>real=True</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/transform.html#forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.transform.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common Fate Transform
+based on a n-dimenional STFT (Short Time Fourier Transform)</p>
+<dl class="docutils">
+<dt>sig <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>input signal</dd>
+<dt>frameShape <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>giving the size of each frame. If its shape is
+smaller than that of sig, assume the frame is of size 1
+for all missing dimensions</dd>
+<dt>hop <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>giving the hopsize in each dimension. If its shape is
+smaller than that of sig, assume the hopsize is 1 for all
+missing dimensions</dd>
+<dt>real: bool</dt>
+<dd>if True, use rfft (discard negative frequencies), if False, use
+fft</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether to output progress during computation</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="commonfate.transform.inverse">
+<code class="descclassname">commonfate.transform.</code><code class="descname">inverse</code><span class="sig-paren">(</span><em>S</em>, <em>fdim</em>, <em>hop</em>, <em>real=True</em>, <em>shape=None</em>, <em>single=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/transform.html#inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.transform.inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse Common Fate Transform</p>
+<dl class="docutils">
+<dt>S <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>containing the stft to be inverted</dd>
+<dt>fdim <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>the number of dimensions in S corresponding to
+frequency indices.</dd>
+<dt>hop <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>containing hopsizes along dimensions.
+Missing hopsizes are assumed to be 1</dd>
+<dt>real <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True, using irfft, if False, using ifft</dd>
+<dt>shape <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>Indicating the original shape of the
+signal for truncating. If None: no truncating is done</dd>
+<dt>single <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if True, single precision</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether or not to display progress</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="commonfate.transform.overlapadd">
+<code class="descclassname">commonfate.transform.</code><code class="descname">overlapadd</code><span class="sig-paren">(</span><em>S</em>, <em>fdim</em>, <em>hop</em>, <em>shape=None</em>, <em>weightedFrames=True</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/transform.html#overlapadd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.transform.overlapadd" title="Permalink to this definition">¶</a></dt>
+<dd><p>n-dimensional overlap-add
+S : ndarray</p>
+<blockquote>
+<div>containing the stft to be inverted</div></blockquote>
+<dl class="docutils">
+<dt>fdim <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>the number of dimensions in S corresponding to
+frame indices.</dd>
+<dt>hop <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>containing hopsizes along dimensions.
+Missing hopsizes are assumed to be 1</dd>
+<dt>shape <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>Indicating the original shape of the
+signal for truncating. If None: no truncating is done</dd>
+<dt>weightedFrames <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>True if we need to compensate for the analysis weighting
+(weightFrames of the split function)</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether or not to display progress</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="commonfate.transform.split">
+<code class="descclassname">commonfate.transform.</code><code class="descname">split</code><span class="sig-paren">(</span><em>sig</em>, <em>frameShape</em>, <em>hop</em>, <em>weightFrames=True</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/transform.html#split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.transform.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>splits a ndarray into overlapping frames</p>
+<p>sig : ndarray</p>
+<dl class="docutils">
+<dt>frameShape <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>giving the size of each frame. If its shape is
+smaller than that of sig, assume the frame is of size 1
+for all missing dimensions</dd>
+<dt>hop <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>giving the hopsize in each dimension. If its shape is
+smaller than that of sig, assume the hopsize is 1 for all
+missing dimensions</dd>
+<dt>weightFrames <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>return frames weighted by a ND hamming window</dd>
+<dt>verbose <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether to output progress during computation</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="commonfate.model.html" class="btn btn-neutral float-right" title="Common Fate Model" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Common Fate Model and Transform" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Antoine Liutkus.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

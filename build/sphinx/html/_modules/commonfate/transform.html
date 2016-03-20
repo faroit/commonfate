@@ -1,0 +1,572 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>commonfate.transform &mdash; commonfate 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="commonfate 0.1.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> commonfate
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../commonfate.transform.html">Common Fate Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commonfate.model.html">Common Fate Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commonfate.decompose.html">Decompose Audio</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">commonfate</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>commonfate.transform</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for commonfate.transform</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">scipy.fftpack</span>
+
+
+<div class="viewcode-block" id="split"><a class="viewcode-back" href="../../commonfate.transform.html#commonfate.transform.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">frameShape</span><span class="p">,</span> <span class="n">hop</span><span class="p">,</span> <span class="n">weightFrames</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;splits a ndarray into overlapping frames</span>
+
+<span class="sd">    sig : ndarray</span>
+
+<span class="sd">    frameShape : tuple</span>
+<span class="sd">        giving the size of each frame. If its shape is</span>
+<span class="sd">        smaller than that of sig, assume the frame is of size 1</span>
+<span class="sd">        for all missing dimensions</span>
+
+<span class="sd">    hop : tuple</span>
+<span class="sd">        giving the hopsize in each dimension. If its shape is</span>
+<span class="sd">        smaller than that of sig, assume the hopsize is 1 for all</span>
+<span class="sd">        missing dimensions</span>
+
+<span class="sd">    weightFrames : bool</span>
+<span class="sd">        return frames weighted by a ND hamming window</span>
+
+<span class="sd">    verbose : bool</span>
+<span class="sd">        whether to output progress during computation&quot;&quot;&quot;</span>
+
+    <span class="c1"># signal shape</span>
+    <span class="n">sigShape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># making sure input shapes are tuples, not simple integers</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">frameShape</span><span class="p">):</span>
+        <span class="n">frameShape</span> <span class="o">=</span> <span class="p">(</span><span class="n">frameShape</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">hop</span><span class="p">):</span>
+        <span class="n">hop</span> <span class="o">=</span> <span class="p">(</span><span class="n">hop</span><span class="p">,)</span>
+
+    <span class="c1"># converting frameShape to array, and building an aligned frameshape,</span>
+    <span class="c1"># which is 1 whenever the frame</span>
+    <span class="c1"># dimension is not given. For instance,</span>
+    <span class="c1"># if frameShape=(1024,) and sigShape=(10000,2),</span>
+    <span class="c1"># frameShapeAligned is set to (1024,1)</span>
+    <span class="n">frameShape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">frameShape</span><span class="p">)</span>
+    <span class="n">fdim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frameShape</span><span class="p">)</span>
+    <span class="n">frameShapeAligned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">frameShape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sigShape</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">frameShape</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># same thing for hop</span>
+    <span class="n">hop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hop</span><span class="p">)</span>
+    <span class="n">hop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hop</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">sigShape</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">hop</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># building the positions of the frames. For each dimension, gridding from</span>
+    <span class="c1"># 0 to sigShape[dim] every hop[dim]</span>
+    <span class="n">framesPos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ogrid</span><span class="p">[[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sigShape</span><span class="p">,</span> <span class="n">hop</span><span class="p">)]]</span>
+
+    <span class="c1"># number of dimensions</span>
+    <span class="n">nDim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">framesPos</span><span class="p">)</span>
+
+    <span class="c1"># now making sure we have at most one frame going out of the signal.</span>
+    <span class="c1"># This is possible, for instance if</span>
+    <span class="c1"># the overlap is very large between the frames</span>
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nDim</span><span class="p">):</span>
+        <span class="c1"># for each dimension, we remove all frames that go beyond the signal</span>
+        <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                    <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+                    <span class="n">frameShapeAligned</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">sigShape</span><span class="p">[</span><span class="n">dim</span><span class="p">])]</span>
+        <span class="c1"># are there frames positions left in this dimension ?</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">]):</span>
+            <span class="c1"># yes. we then add a last frame (the one going beyond the signal),</span>
+            <span class="c1"># if it is possible. (it may NOT be</span>
+            <span class="c1"># possible in some exotic cases such as hopSize[dim]&gt;1 and</span>
+            <span class="c1"># frameShapeAligned[dim]==1</span>
+            <span class="k">if</span> <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">hop</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">sigShape</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
+                <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">hop</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if there is no more frames in this dimension (short signal in</span>
+            <span class="c1"># this dimension), then at least consider 0</span>
+            <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># constructing the shape of the framed signal</span>
+    <span class="n">framedShape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frameShape</span><span class="p">,</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">framesPos</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">weightFrames</span><span class="p">:</span>
+        <span class="c1"># constructing the weighting window. Choosing hamming for convenience</span>
+        <span class="c1"># (never 0)</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frameShape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hamming</span><span class="p">(</span><span class="n">frameShapeAligned</span><span class="p">[</span><span class="n">dim</span><span class="p">]),</span> <span class="n">win</span><span class="p">)</span>
+        <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">win</span><span class="p">)</span>
+
+    <span class="c1"># alocating memory for framed signal</span>
+    <span class="n">framed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">framedShape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sig</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># total number of frames (for displaying)</span>
+    <span class="n">nFrames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">framesPos</span><span class="p">])</span>
+
+    <span class="c1"># for each frame</span>
+    <span class="k">for</span> <span class="n">iframe</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+        <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">framesPos</span><span class="p">])</span>
+    <span class="p">):</span>
+        <span class="c1"># display from time to time if asked for</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">iframe</span> <span class="o">%</span> <span class="mi">100</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s1">&#39;Splitting : frame &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">iframe</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nFrames</span><span class="p">)</span>
+
+        <span class="c1"># build the slice to use for extracting the signal of this frame.</span>
+        <span class="n">frameRange</span> <span class="o">=</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nDim</span><span class="p">):</span>
+            <span class="n">frameRange</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="nb">slice</span><span class="p">(</span>
+                    <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">index</span><span class="p">[</span><span class="n">dim</span><span class="p">]],</span>
+                    <span class="nb">min</span><span class="p">(</span>
+                        <span class="n">sigShape</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+                        <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">index</span><span class="p">[</span><span class="n">dim</span><span class="p">]]</span> <span class="o">+</span> <span class="n">frameShapeAligned</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="c1"># extract the signal</span>
+        <span class="n">sigFrame</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="n">frameRange</span><span class="p">]</span>
+        <span class="n">sigFrame</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">sigFrame</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="n">fdim</span><span class="p">]</span>
+
+        <span class="c1"># the signal may be shorter than the normal size of a frame</span>
+        <span class="c1"># (at the end of the signal). We build a slice that corresponds to</span>
+        <span class="c1"># the actual size we got here</span>
+        <span class="n">sigFrameRange</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sigFrame</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="n">fdim</span><span class="p">]]</span>
+
+        <span class="c1"># puts the signal in the output variable</span>
+        <span class="n">framed</span><span class="p">[</span><span class="n">sigFrameRange</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span> <span class="o">=</span> <span class="n">sigFrame</span>
+
+        <span class="k">if</span> <span class="n">weightFrames</span><span class="p">:</span>
+            <span class="c1"># multiply by the weighting window</span>
+            <span class="n">framed</span><span class="p">[[</span><span class="bp">Ellipsis</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span> <span class="o">*=</span> <span class="n">win</span>
+
+    <span class="n">frameShape</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">frameShape</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">framed</span></div>
+
+
+<div class="viewcode-block" id="overlapadd"><a class="viewcode-back" href="../../commonfate.transform.html#commonfate.transform.overlapadd">[docs]</a><span class="k">def</span> <span class="nf">overlapadd</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">fdim</span><span class="p">,</span> <span class="n">hop</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weightedFrames</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;n-dimensional overlap-add</span>
+<span class="sd">    S : ndarray</span>
+<span class="sd">        containing the stft to be inverted</span>
+
+<span class="sd">    fdim : int</span>
+<span class="sd">        the number of dimensions in S corresponding to</span>
+<span class="sd">        frame indices.</span>
+
+<span class="sd">    hop : tuple</span>
+<span class="sd">        containing hopsizes along dimensions.</span>
+<span class="sd">        Missing hopsizes are assumed to be 1</span>
+
+<span class="sd">    shape : tuple</span>
+<span class="sd">        Indicating the original shape of the</span>
+<span class="sd">        signal for truncating. If None: no truncating is done</span>
+
+<span class="sd">    weightedFrames : bool</span>
+<span class="sd">        True if we need to compensate for the analysis weighting</span>
+<span class="sd">        (weightFrames of the split function)</span>
+
+<span class="sd">    verbose : bool</span>
+<span class="sd">        whether or not to display progress</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># number of dimensions</span>
+    <span class="n">nDim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">frameShape</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="n">fdim</span><span class="p">]</span>
+    <span class="n">trueFrameShape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">frameShape</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">nDim</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">frameShape</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># same thing for hop</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">hop</span><span class="p">):</span>
+        <span class="n">hop</span> <span class="o">=</span> <span class="p">(</span><span class="n">hop</span><span class="p">,)</span>
+    <span class="n">hop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hop</span><span class="p">)</span>
+    <span class="n">hop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hop</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">nDim</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">hop</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">sigShape</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">nframedim</span> <span class="o">-</span>
+         <span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
+        <span class="n">hopdim</span> <span class="o">+</span>
+        <span class="n">frameshapedim</span> <span class="k">for</span> <span class="p">(</span>
+            <span class="n">nframedim</span><span class="p">,</span>
+            <span class="n">hopdim</span><span class="p">,</span>
+            <span class="n">frameshapedim</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span>
+                <span class="n">fdim</span><span class="p">:],</span>
+            <span class="n">hop</span><span class="p">,</span>
+            <span class="n">trueFrameShape</span><span class="p">)]</span>
+
+    <span class="c1"># building the positions of the frames. For each dimension, gridding from</span>
+    <span class="c1"># 0 to sigShape[dim] every hop[dim]</span>
+    <span class="n">framesPos</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">*</span>
+        <span class="n">step</span> <span class="k">for</span> <span class="p">(</span>
+            <span class="n">size</span><span class="p">,</span>
+            <span class="n">step</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span>
+                <span class="n">fdim</span><span class="p">:],</span>
+            <span class="n">hop</span><span class="p">)]</span>
+
+    <span class="c1"># constructing the weighting window. Choosing hamming for convenience</span>
+    <span class="c1"># (never 0)</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fdim</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">trueFrameShape</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">win</span> <span class="o">=</span> <span class="n">win</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">((</span><span class="bp">None</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">win</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="bp">Ellipsis</span><span class="p">,))</span>
+            <span class="n">win</span> <span class="o">=</span> <span class="n">win</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">*</span> \
+                <span class="n">np</span><span class="o">.</span><span class="n">hamming</span><span class="p">(</span><span class="n">trueFrameShape</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="c1"># if we need to compensate for analysis weighting, simply square window</span>
+    <span class="k">if</span> <span class="n">weightedFrames</span><span class="p">:</span>
+        <span class="n">win2</span> <span class="o">=</span> <span class="n">win</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">win2</span> <span class="o">=</span> <span class="n">win</span>
+
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sigShape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># will also store the sum of all weighting windows applied during</span>
+    <span class="c1"># overlap and add. Traditionally, window function and overlap are chosen</span>
+    <span class="c1"># so that these weights end up being 1 everywhere. However, we here are</span>
+    <span class="c1"># not restricted here to any particular hopsize. Hence, the price to pay</span>
+    <span class="c1"># is this further memory burden</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sigShape</span><span class="p">)</span>
+
+    <span class="c1"># total number of frames (for displaying)</span>
+    <span class="n">nFrames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">fdim</span><span class="p">:])</span>
+
+    <span class="c1"># could use memmap or stuff</span>
+    <span class="n">S</span> <span class="o">*=</span> <span class="n">win</span><span class="p">[[</span><span class="bp">Ellipsis</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">win</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+
+    <span class="c1"># for each frame</span>
+    <span class="k">for</span> <span class="n">iframe</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+        <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">framesPos</span><span class="p">])</span>
+    <span class="p">):</span>
+        <span class="c1"># display from time to time if asked for</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">iframe</span> <span class="o">%</span> <span class="mi">100</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s1">&#39;overlap-add : frame &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">iframe</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nFrames</span><span class="p">)</span>
+
+        <span class="c1"># build the slice to use for overlap-adding the signal of this frame.</span>
+        <span class="n">frameRange</span> <span class="o">=</span> <span class="p">[</span><span class="bp">Ellipsis</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nDim</span> <span class="o">-</span> <span class="n">fdim</span><span class="p">):</span>
+            <span class="n">frameRange</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="nb">slice</span><span class="p">(</span>
+                    <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">index</span><span class="p">[</span><span class="n">dim</span><span class="p">]],</span>
+                    <span class="nb">min</span><span class="p">(</span>
+                        <span class="n">sigShape</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+                        <span class="n">framesPos</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">index</span><span class="p">[</span><span class="n">dim</span><span class="p">]]</span> <span class="o">+</span> <span class="n">trueFrameShape</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="mi">1</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="c1"># put back the reconstructed weighted frame into place</span>
+        <span class="n">frameSig</span> <span class="o">=</span> <span class="n">S</span><span class="p">[[</span><span class="bp">Ellipsis</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span>
+        <span class="n">sig</span><span class="p">[</span><span class="n">frameRange</span><span class="p">]</span> <span class="o">+=</span> <span class="n">frameSig</span><span class="p">[[</span><span class="bp">Ellipsis</span><span class="p">]</span> <span class="o">+</span>
+                                    <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span>
+                                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="p">[</span><span class="n">frameRange</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span>
+                                     <span class="nb">len</span><span class="p">(</span><span class="n">frameSig</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+
+        <span class="c1"># also store the corresponding window contribution</span>
+        <span class="n">weights</span><span class="p">[</span><span class="n">frameRange</span><span class="p">]</span> <span class="o">+=</span> <span class="n">win2</span><span class="p">[[</span><span class="bp">Ellipsis</span><span class="p">]</span> <span class="o">+</span>
+                                    <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span>
+                                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">frameRange</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span>
+                                     <span class="nb">len</span><span class="p">(</span><span class="n">win2</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+
+    <span class="c1"># account for different weighting at different places</span>
+    <span class="n">sig</span> <span class="o">/=</span> <span class="n">weights</span>
+
+    <span class="c1"># truncate the signal if asked for</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">sig_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">truncateRange</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shape</span><span class="p">)]</span>
+        <span class="n">sig_res</span><span class="p">[</span><span class="n">truncateRange</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="n">truncateRange</span><span class="p">]</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">sig_res</span>
+
+    <span class="c1"># finished</span>
+    <span class="k">return</span> <span class="n">sig</span></div>
+
+
+<div class="viewcode-block" id="forward"><a class="viewcode-back" href="../../commonfate.transform.html#commonfate.transform.forward">[docs]</a><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">frameShape</span><span class="p">,</span> <span class="n">hop</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Common Fate Transform</span>
+<span class="sd">    based on a n-dimenional STFT (Short Time Fourier Transform)</span>
+
+<span class="sd">    sig : ndarray</span>
+<span class="sd">        input signal</span>
+
+<span class="sd">    frameShape : tuple</span>
+<span class="sd">        giving the size of each frame. If its shape is</span>
+<span class="sd">        smaller than that of sig, assume the frame is of size 1</span>
+<span class="sd">        for all missing dimensions</span>
+
+<span class="sd">    hop : tuple</span>
+<span class="sd">        giving the hopsize in each dimension. If its shape is</span>
+<span class="sd">        smaller than that of sig, assume the hopsize is 1 for all</span>
+<span class="sd">        missing dimensions</span>
+
+<span class="sd">    real: bool</span>
+<span class="sd">        if True, use rfft (discard negative frequencies), if False, use</span>
+<span class="sd">        fft</span>
+
+<span class="sd">    verbose : bool</span>
+<span class="sd">        whether to output progress during computation&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">frameShape</span><span class="p">):</span>
+        <span class="n">frameShape</span> <span class="o">=</span> <span class="p">(</span><span class="n">frameShape</span><span class="p">,)</span>
+    <span class="n">stft</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">frameShape</span><span class="p">,</span> <span class="n">hop</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># at the end, we apply the fft function. We do this at the end for the</span>
+    <span class="c1"># speed of calling it only once, but I&#39;ve</span>
+    <span class="c1"># noticed this may cause memory error problems. I decided not to care. One</span>
+    <span class="c1"># could use memmap or stuff</span>
+    <span class="c1"># if the signal is real, use rfft, else use fft</span>
+    <span class="k">if</span> <span class="n">real</span><span class="p">:</span>
+        <span class="n">fftFunction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftn</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fftFunction</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fftpack</span><span class="o">.</span><span class="n">fftn</span>
+    <span class="n">stft</span> <span class="o">=</span> <span class="n">fftFunction</span><span class="p">(</span><span class="n">stft</span><span class="p">,</span> <span class="n">frameShape</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frameShape</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">stft</span></div>
+
+
+<div class="viewcode-block" id="inverse"><a class="viewcode-back" href="../../commonfate.transform.html#commonfate.transform.inverse">[docs]</a><span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">fdim</span><span class="p">,</span> <span class="n">hop</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">single</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inverse Common Fate Transform</span>
+
+<span class="sd">    S : ndarray</span>
+<span class="sd">        containing the stft to be inverted</span>
+
+<span class="sd">    fdim : int</span>
+<span class="sd">        the number of dimensions in S corresponding to</span>
+<span class="sd">        frequency indices.</span>
+
+<span class="sd">    hop : tuple</span>
+<span class="sd">        containing hopsizes along dimensions.</span>
+<span class="sd">        Missing hopsizes are assumed to be 1</span>
+
+<span class="sd">    real : bool</span>
+<span class="sd">        if True, using irfft, if False, using ifft</span>
+
+<span class="sd">    shape : tuple</span>
+<span class="sd">        Indicating the original shape of the</span>
+<span class="sd">        signal for truncating. If None: no truncating is done</span>
+
+<span class="sd">    single : bool</span>
+<span class="sd">        if True, single precision</span>
+
+<span class="sd">    verbose : bool</span>
+<span class="sd">        whether or not to display progress</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># alocating memory for stft</span>
+    <span class="k">if</span> <span class="n">real</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">single</span><span class="p">:</span>
+            <span class="n">typeSig</span> <span class="o">=</span> <span class="s1">&#39;float32&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">typeSig</span> <span class="o">=</span> <span class="s1">&#39;float64&#39;</span>
+        <span class="n">ifftFunction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfftn</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">single</span><span class="p">:</span>
+            <span class="n">typeSig</span> <span class="o">=</span> <span class="s1">&#39;complex64&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">typeSig</span> <span class="o">=</span> <span class="s1">&#39;complex128&#39;</span>
+        <span class="n">ifftFunction</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fftpack</span><span class="o">.</span><span class="n">ifftn</span>
+
+    <span class="c1"># before overlap-add, we apply the ifft function.</span>
+    <span class="c1"># We do this now for the speed of calling it only once, but I&#39;ve</span>
+    <span class="c1"># noticed this may cause memory error problems. I decided not to care. One</span>
+    <span class="c1"># could use memmap or stuff</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">ifftFunction</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">fdim</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">typeSig</span><span class="p">)</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">overlapadd</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">fdim</span><span class="p">,</span> <span class="n">hop</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># finished</span>
+    <span class="k">return</span> <span class="n">sig</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Antoine Liutkus.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
