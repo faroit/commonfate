@@ -133,13 +133,13 @@
 <h1>Common Fate Model<a class="headerlink" href="#common-fate-model" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="module-commonfate.model"></span><dl class="class">
 <dt id="commonfate.model.CFM">
-<em class="property">class </em><code class="descclassname">commonfate.model.</code><code class="descname">CFM</code><span class="sig-paren">(</span><em>data</em>, <em>nb_components</em>, <em>nb_iter=100</em>, <em>beta=1</em>, <em>P=None</em>, <em>At=None</em>, <em>Ac=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/model.html#CFM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.model.CFM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">commonfate.model.</code><code class="descname">CFM</code><span class="sig-paren">(</span><em>data</em>, <em>nb_components</em>, <em>nb_iter=100</em>, <em>beta=1</em>, <em>A=None</em>, <em>H=None</em>, <em>C=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/model.html#CFM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.model.CFM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The Common Fate model
-Vj(a,b,f,t,c) = P(a,b,f,j)At(t,j)Ac(c,j)</p>
+Pj(a,b,f,t,c) = A(a,b,f,j)H(t,j)C(c,j)</p>
 <p>Factorises one modulation texture P for each frequency,
-hence P(a,b,f,j) which is activated over time, this is At(t,j) and over
-channels Ac(c,j)</p>
+hence A(a,b,f,j) which is activated over time, this is H(t,j) and over
+channels C(c,j)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -177,14 +177,14 @@ calculation down. Particular cases of interest are:</p>
 <div><p>initialisation of P. Defaults to <cite>none</cite>,
 results in random initialisation. shape=(a, b, f, j)</p>
 </div></blockquote>
-<p><strong>At</strong> : ndarray, optional</p>
+<p><strong>H</strong> : ndarray, optional</p>
 <blockquote>
-<div><p>initialisation of At. Defaults to <cite>none</cite>,
+<div><p>initialisation of H. Defaults to <cite>none</cite>,
 results in random initialisation. shape=(t, j)</p>
 </div></blockquote>
-<p><strong>Ac</strong> : ndarray, optional</p>
+<p><strong>C</strong> : ndarray, optional</p>
 <blockquote class="last">
-<div><p>initialisation of Ac. Defaults to <cite>none</cite>,
+<div><p>initialisation of C. Defaults to <cite>none</cite>,
 results in random initialisation. shape=(c, j)</p>
 </div></blockquote>
 </td>
@@ -228,8 +228,7 @@ results in random initialisation. shape=(c, j)</p>
 <dl class="method">
 <dt id="commonfate.model.CFM.fit">
 <code class="descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/model.html#CFM.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.model.CFM.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>fits a common fate model to
-Z(a,b,f,t,i) = P(a,b,j)Af(f,j)At(t,j)Ac(i,j)</p>
+<dd><p>fits a common fate model</p>
 <p>returns <code class="docutils literal"><span class="pre">CFM</span></code> model</p>
 </dd></dl>
 
@@ -237,28 +236,28 @@ Z(a,b,f,t,i) = P(a,b,j)Af(f,j)At(t,j)Ac(i,j)</p>
 
 <dl class="function">
 <dt id="commonfate.model.hat">
-<code class="descclassname">commonfate.model.</code><code class="descname">hat</code><span class="sig-paren">(</span><em>P</em>, <em>At</em>, <em>Ac</em>, <em>eps=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/model.html#hat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.model.hat" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">commonfate.model.</code><code class="descname">hat</code><span class="sig-paren">(</span><em>A</em>, <em>H</em>, <em>C</em>, <em>eps=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/model.html#hat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.model.hat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds common fate model tensor from factors
 makes use of numpys einstein summation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>P</strong> : tuple</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : tuple</p>
 <blockquote>
 <div><p>The shape</p>
 </div></blockquote>
-<p><strong>At</strong> : tuple</p>
+<p><strong>H</strong> : tuple</p>
 <blockquote>
 <div><p>The shape</p>
 </div></blockquote>
-<p><strong>Ac</strong> : tuple</p>
+<p><strong>C</strong> : tuple</p>
 <blockquote>
 <div><p>The shape</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">np.ndarray, shape=(P.shape + At.shape + Ac.shape)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">np.ndarray, shape=(P.shape + H.shape + C.shape)</p>
 <blockquote class="last">
 <div><p>tensor with same shape as common fate transform</p>
 </div></blockquote>

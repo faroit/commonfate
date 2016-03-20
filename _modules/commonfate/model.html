@@ -137,28 +137,28 @@
     <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">einsum</span>
 
 
-<div class="viewcode-block" id="hat"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.hat">[docs]</a><span class="k">def</span> <span class="nf">hat</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">Ac</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="hat"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.hat">[docs]</a><span class="k">def</span> <span class="nf">hat</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Builds common fate model tensor from factors</span>
 <span class="sd">    makes use of numpys einstein summation</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    P : tuple</span>
+<span class="sd">    A : tuple</span>
 <span class="sd">        The shape</span>
-<span class="sd">    At : tuple</span>
+<span class="sd">    H : tuple</span>
 <span class="sd">        The shape</span>
-<span class="sd">    Ac : tuple</span>
+<span class="sd">    C : tuple</span>
 <span class="sd">        The shape</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.ndarray, shape=(P.shape + At.shape + Ac.shape)</span>
+<span class="sd">    np.ndarray, shape=(P.shape + H.shape + C.shape)</span>
 <span class="sd">        tensor with same shape as common fate transform</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">eps</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
 
-    <span class="k">return</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;abfj,tj,cj-&gt;abftc&#39;</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">At</span><span class="p">,</span> <span class="n">Ac</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">eps</span> <span class="o">+</span> <span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;abfj,tj,cj-&gt;abftc&#39;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="nnrandn"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.nnrandn">[docs]</a><span class="k">def</span> <span class="nf">nnrandn</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
@@ -179,11 +179,11 @@
 
 <div class="viewcode-block" id="CFM"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.CFM">[docs]</a><span class="k">class</span> <span class="nc">CFM</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The Common Fate model</span>
-<span class="sd">    Vj(a,b,f,t,c) = P(a,b,f,j)At(t,j)Ac(c,j)</span>
+<span class="sd">    Pj(a,b,f,t,c) = A(a,b,f,j)H(t,j)C(c,j)</span>
 
 <span class="sd">    Factorises one modulation texture P for each frequency,</span>
-<span class="sd">    hence P(a,b,f,j) which is activated over time, this is At(t,j) and over</span>
-<span class="sd">    channels Ac(c,j)</span>
+<span class="sd">    hence A(a,b,f,j) which is activated over time, this is H(t,j) and over</span>
+<span class="sd">    channels C(c,j)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -213,12 +213,12 @@
 <span class="sd">        initialisation of P. Defaults to `none`,</span>
 <span class="sd">        results in random initialisation. shape=(a, b, f, j)</span>
 
-<span class="sd">    At : ndarray, optional</span>
-<span class="sd">        initialisation of At. Defaults to `none`,</span>
+<span class="sd">    H : ndarray, optional</span>
+<span class="sd">        initialisation of H. Defaults to `none`,</span>
 <span class="sd">        results in random initialisation. shape=(t, j)</span>
 
-<span class="sd">    Ac : ndarray, optional</span>
-<span class="sd">        initialisation of Ac. Defaults to `none`,</span>
+<span class="sd">    C : ndarray, optional</span>
+<span class="sd">        initialisation of C. Defaults to `none`,</span>
 <span class="sd">        results in random initialisation. shape=(c, j)</span>
 
 <span class="sd">    Methods</span>
@@ -234,9 +234,9 @@
         <span class="n">nb_components</span><span class="p">,</span>
         <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">P</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">At</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">Ac</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">A</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">H</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">C</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># General fitting parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
@@ -245,30 +245,29 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nb_iter</span> <span class="o">=</span> <span class="n">nb_iter</span>
 
         <span class="c1"># Factorisation Parameters</span>
-        <span class="k">if</span> <span class="n">P</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">nb_components</span><span class="p">,))</span>
+        <span class="k">if</span> <span class="n">A</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_A</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">nb_components</span><span class="p">,))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">=</span> <span class="n">P</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_A</span> <span class="o">=</span> <span class="n">A</span>
 
-        <span class="k">if</span> <span class="n">At</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_At</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">nb_components</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">H</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_H</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">nb_components</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_At</span> <span class="o">=</span> <span class="n">At</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_H</span> <span class="o">=</span> <span class="n">H</span>
 
-        <span class="k">if</span> <span class="n">Ac</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">nb_components</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">C</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">=</span> <span class="n">nnrandn</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">nb_components</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span> <span class="o">=</span> <span class="n">Ac</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">=</span> <span class="n">C</span>
 
 <div class="viewcode-block" id="CFM.fit"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.CFM.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;fits a common fate model to</span>
-<span class="sd">        Z(a,b,f,t,i) = P(a,b,j)Af(f,j)At(t,j)Ac(i,j)</span>
+        <span class="sd">&quot;&quot;&quot;fits a common fate model</span>
 
 <span class="sd">        returns ``CFM`` model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">MU</span><span class="p">(</span><span class="n">einsumString</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">factors</span><span class="p">):</span>
-            <span class="n">Zhat</span> <span class="o">=</span> <span class="n">hat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">)</span>
+            <span class="n">Zhat</span> <span class="o">=</span> <span class="n">hat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="n">einsum</span><span class="p">(</span>
                     <span class="n">einsumString</span><span class="p">,</span>
@@ -282,9 +281,9 @@
             <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_iter</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,tj,cj-&gt;abfj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_At</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,abfj,cj-&gt;tj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,abfj,tj-&gt;cj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_A</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,tj,cj-&gt;abfj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_H</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,abfj,cj-&gt;tj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_C</span> <span class="o">*=</span> <span class="n">MU</span><span class="p">(</span><span class="s1">&#39;abftc,abfj,tj-&gt;cj&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
@@ -295,7 +294,7 @@
 
 <span class="sd">        :type: tuple</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CFM.approx"><a class="viewcode-back" href="../../commonfate.model.html#commonfate.model.CFM.approx">[docs]</a>    <span class="k">def</span> <span class="nf">approx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -303,7 +302,7 @@
 
 <span class="sd">        returns ndarray, shape=(a, b, f, t, c)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">hat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_At</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ac</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">hat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_C</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
