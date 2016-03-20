@@ -6,28 +6,28 @@ except ImportError:
     from numpy import einsum
 
 
-def hat(P, At, Ac, eps=None):
+def hat(A, H, C, eps=None):
     """Builds common fate model tensor from factors
     makes use of numpys einstein summation
 
     Parameters
     ----------
-    P : tuple
+    A : tuple
         The shape
-    At : tuple
+    H : tuple
         The shape
-    Ac : tuple
+    C : tuple
         The shape
 
     Returns
     -------
-    np.ndarray, shape=(P.shape + At.shape + Ac.shape)
+    np.ndarray, shape=(P.shape + H.shape + C.shape)
         tensor with same shape as common fate transform
     """
     if eps is None:
         eps = np.finfo(float).eps
 
-    return eps + einsum('abfj,tj,cj->abftc', P, At, Ac)
+    return eps + einsum('abfj,tj,cj->abftc', A, H, C)
 
 
 def nnrandn(shape):
@@ -48,11 +48,11 @@ def nnrandn(shape):
 
 class CFM(object):
     """The Common Fate model
-    Vj(a,b,f,t,c) = P(a,b,f,j)At(t,j)Ac(c,j)
+    Pj(a,b,f,t,c) = A(a,b,f,j)H(t,j)C(c,j)
 
     Factorises one modulation texture P for each frequency,
-    hence P(a,b,f,j) which is activated over time, this is At(t,j) and over
-    channels Ac(c,j)
+    hence A(a,b,f,j) which is activated over time, this is H(t,j) and over
+    channels C(c,j)
 
     Parameters
     ----------
@@ -82,12 +82,12 @@ class CFM(object):
         initialisation of P. Defaults to `none`,
         results in random initialisation. shape=(a, b, f, j)
 
-    At : ndarray, optional
-        initialisation of At. Defaults to `none`,
+    H : ndarray, optional
+        initialisation of H. Defaults to `none`,
         results in random initialisation. shape=(t, j)
 
-    Ac : ndarray, optional
-        initialisation of Ac. Defaults to `none`,
+    C : ndarray, optional
+        initialisation of C. Defaults to `none`,
         results in random initialisation. shape=(c, j)
 
     Methods
@@ -103,9 +103,9 @@ class CFM(object):
         nb_components,
         nb_iter=100,
         beta=1,
-        P=None,
-        At=None,
-        Ac=None,
+        A=None,
+        H=None,
+        C=None,
     ):
         # General fitting parameters
         self.data = data
@@ -114,30 +114,29 @@ class CFM(object):
         self.nb_iter = nb_iter
 
         # Factorisation Parameters
-        if P is None:
-            self._P = nnrandn(self.data.shape[:3] + (nb_components,))
+        if A is None:
+            self._A = nnrandn(self.data.shape[:3] + (nb_components,))
         else:
-            self._P = P
+            self._A = A
 
-        if At is None:
-            self._At = nnrandn((self.data.shape[3], nb_components))
+        if H is None:
+            self._H = nnrandn((self.data.shape[3], nb_components))
         else:
-            self._At = At
+            self._H = H
 
-        if Ac is None:
-            self._Ac = nnrandn((self.data.shape[4], nb_components))
+        if C is None:
+            self._C = nnrandn((self.data.shape[4], nb_components))
         else:
-            self._Ac = Ac
+            self._C = C
 
     def fit(self):
-        """fits a common fate model to
-        Z(a,b,f,t,i) = P(a,b,j)Af(f,j)At(t,j)Ac(i,j)
+        """fits a common fate model
 
         returns ``CFM`` model
         """
 
         def MU(einsumString, Z, factors):
-            Zhat = hat(self._P, self._At, self._Ac)
+            Zhat = hat(self._A, self._H, self._C)
             return (
                 einsum(
                     einsumString,
@@ -151,9 +150,9 @@ class CFM(object):
             )
 
         for it in tqdm.tqdm(range(self.nb_iter)):
-            self._P *= MU('abftc,tj,cj->abfj', self.data, (self._At, self._Ac))
-            self._At *= MU('abftc,abfj,cj->tj', self.data, (self._P, self._Ac))
-            self._Ac *= MU('abftc,abfj,tj->cj', self.data, (self._P, self._At))
+            self._A *= MU('abftc,tj,cj->abfj', self.data, (self._H, self._C))
+            self._H *= MU('abftc,abfj,cj->tj', self.data, (self._A, self._C))
+            self._C *= MU('abftc,abfj,tj->cj', self.data, (self._A, self._H))
 
         return self
 
@@ -164,7 +163,7 @@ class CFM(object):
 
         :type: tuple
         """
-        return (self._P, self._At, self._Ac)
+        return (self._A, self._H, self._C)
 
     def approx(self):
         """
@@ -172,4 +171,4 @@ class CFM(object):
 
         returns ndarray, shape=(a, b, f, t, c)
         """
-        return hat(self._P, self._At, self._Ac)
+        return hat(self._A, self._H, self._C)

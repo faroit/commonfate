@@ -45,7 +45,7 @@ import commonfate
 cfm = commonfate.model.CFM(z, nb_components=10, nb_iter=100).fit()
 
 # get the fitted factors
-(P, At, Ac) = cfm.factors
+(A, H, C) = cfm.factors
 
 # returns the of z approximation using the fitted factors
 z_hat = cfm.approx()

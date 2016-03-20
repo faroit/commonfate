@@ -76,7 +76,7 @@ def process(
         nb_components=nb_components
     ).fit()
 
-    (P, At, Ac) = cfm.factors
+    (A, H, C) = cfm.factors
 
     xcft_hat = cfm.approx()
 
@@ -85,9 +85,9 @@ def process(
     for j in range(nb_components):
 
         Fj = model.hat(
-            P[..., j][..., None],
-            At[..., j][..., None],
-            Ac[..., j][..., None],
+            A[..., j][..., None],
+            H[..., j][..., None],
+            C[..., j][..., None],
         )
 
         yj = Fj / xcft_hat * xcft
