@@ -1,5 +1,0 @@
-commonfate package
-============
-
-Module contents
----------------
