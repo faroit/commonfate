@@ -6,7 +6,7 @@ if __name__ == "__main__":
         name='commonfate',
 
         # Version
-        version="0.1.0",
+        version="0.1.1",
 
         # Description
         description='Common Fate Transform and Model',
