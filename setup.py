@@ -18,7 +18,7 @@ if __name__ == "__main__":
         author_email='antoine.liutkus@inria.fr',
 
         # License
-        license='MIT',
+        license='BSD',
 
         # Packages in this project
         # find_packages() finds all these automatically for you
