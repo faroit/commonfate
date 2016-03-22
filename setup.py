@@ -11,6 +11,8 @@ if __name__ == "__main__":
         # Description
         description='Common Fate Transform and Model',
 
+        url='https://github.com/aliutkus/commonfate',
+
         # Your contact information
         author='Antoine Liutkus',
         author_email='antoine.liutkus@inria.fr',
