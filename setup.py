@@ -54,14 +54,12 @@ if __name__ == "__main__":
         classifiers=[
             'Development Status :: 4 - Beta',
             'Environment :: Console',
-            'Environment :: Plugins',
             'Intended Audience :: Telecommunications Industry',
             'Intended Audience :: Science/Research',
             'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
             'Topic :: Multimedia :: Sound/Audio :: Analysis',
             'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis'
-            'Topic :: Scientific/Engineering :: Information Analysis',
         ],
 
         zip_safe=False,
