@@ -129,9 +129,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-commonfate.transform">
-<span id="common-fate-transform"></span><h1>Common Fate Transform<a class="headerlink" href="#module-commonfate.transform" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
+  <div class="section" id="common-fate-transform">
+<h1>Common Fate Transform<a class="headerlink" href="#common-fate-transform" title="Permalink to this headline">¶</a></h1>
+<div class="figure" id="id1">
+<img alt="cft" src="https://cloud.githubusercontent.com/assets/72940/13906318/5de230a0-ef0e-11e5-8447-3a2f1600a22a.png" />
+<p class="caption"><span class="caption-text">cft</span></p>
+</div>
+<p>The Common Fate Transform is based on a signal representation that
+divides a complex spectrogram into a grid of patches of arbitrary size.
+These complex patches are then processed by a two-dimensional discrete
+Fourier transform, forming a tensor representation which reveals
+spectral and temporal modulation textures.</p>
+<span class="target" id="module-commonfate.transform"></span><dl class="function">
 <dt id="commonfate.transform.forward">
 <code class="descclassname">commonfate.transform.</code><code class="descname">forward</code><span class="sig-paren">(</span><em>sig</em>, <em>frameShape</em>, <em>hop</em>, <em>real=True</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/commonfate/transform.html#forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#commonfate.transform.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Common Fate Transform

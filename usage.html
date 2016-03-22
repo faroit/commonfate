@@ -1,0 +1,290 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage &mdash; commonfate 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="commonfate 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Common Fate Transform" href="commonfate.transform.html"/>
+        <link rel="prev" title="Common Fate Model and Transform" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> commonfate
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#applying-the-common-fate-transform">Applying the Common Fate Transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fitting-the-common-fate-model">Fitting the Common Fate Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#decompose-an-audio-signal-using-cft-and-cfm">Decompose an audio signal using CFT and CFM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="commonfate.transform.html">Common Fate Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonfate.model.html">Common Fate Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commonfate.decompose.html">Decompose Audio</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">commonfate</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Usage</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/usage.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="applying-the-common-fate-transform">
+<h2>Applying the Common Fate Transform<a class="headerlink" href="#applying-the-common-fate-transform" title="Permalink to this headline">¶</a></h2>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">commonfate</span>
+
+<span class="c1"># # forward transform</span>
+
+<span class="c1"># STFT Parameters</span>
+
+<span class="n">framelength</span> <span class="o">=</span> <span class="mi">1024</span>
+<span class="n">hopsize</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">commonfate</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">framelength</span><span class="p">,</span> <span class="n">hopsize</span><span class="p">)</span>
+
+<span class="c1"># Patch Parameters</span>
+<span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">48</span><span class="p">)</span>
+<span class="n">mhop</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+
+<span class="n">Z</span> <span class="o">=</span> <span class="n">commonfate</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">mhop</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c1"># inverse transform of cft</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">commonfate</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
+    <span class="n">Z</span><span class="p">,</span> <span class="n">fdim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="n">mhop</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="bp">False</span>
+<span class="p">)</span>
+<span class="c1"># back to time domain</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">commonfate</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span>
+    <span class="n">Y</span><span class="p">,</span> <span class="n">fdim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="n">hopsize</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fitting-the-common-fate-model">
+<h2>Fitting the Common Fate Model<a class="headerlink" href="#fitting-the-common-fate-model" title="Permalink to this headline">¶</a></h2>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">commonfate</span>
+
+<span class="c1"># initialiase and fit the common fate model</span>
+<span class="n">cfm</span> <span class="o">=</span> <span class="n">commonfate</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">CFM</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">nb_components</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+<span class="c1"># get the fitted factors</span>
+<span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span> <span class="o">=</span> <span class="n">cfm</span><span class="o">.</span><span class="n">factors</span>
+
+<span class="c1"># returns the of z approximation using the fitted factors</span>
+<span class="n">z_hat</span> <span class="o">=</span> <span class="n">cfm</span><span class="o">.</span><span class="n">approx</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="decompose-an-audio-signal-using-cft-and-cfm">
+<h2>Decompose an audio signal using CFT and CFM<a class="headerlink" href="#decompose-an-audio-signal-using-cft-and-cfm" title="Permalink to this headline">¶</a></h2>
+<p><em>commonfate</em> has a built-in wrapper which computes the <em>Common Fate
+Transform</em>, fits the model according to the <em>Common Fate Model</em> and
+return the synthesised time domain signal components obtained through
+wiener / soft mask filtering.</p>
+<p>The following example requires to install
+<a class="reference external" href="https://github.com/bastibe/PySoundFile">pysoundfile</a>.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">commonfate</span>
+<span class="kn">import</span> <span class="nn">soundfile</span> <span class="kn">as</span> <span class="nn">sf</span>
+
+<span class="c1"># loading signal</span>
+<span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">always_2d</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># decomposes the audio signal into</span>
+<span class="c1"># (nb_components, nb_samples, nb_channels)</span>
+<span class="n">components</span> <span class="o">=</span> <span class="n">decompose</span><span class="o">.</span><span class="n">process</span><span class="p">(</span>
+    <span class="n">audio</span><span class="p">,</span>
+    <span class="n">nb_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">nb_components</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">n_fft</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+    <span class="n">n_hop</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">cft_patch</span><span class="o">=</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">48</span><span class="p">),</span>
+    <span class="n">cft_hop</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># write out the third component to wave file</span>
+<span class="n">sf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+    <span class="s2">&quot;comp_3.wav&quot;</span><span class="p">,</span>
+    <span class="n">components</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">fs</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="commonfate.transform.html" class="btn btn-neutral float-right" title="Common Fate Transform" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Common Fate Model and Transform" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Antoine Liutkus.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
