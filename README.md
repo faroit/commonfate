@@ -23,8 +23,18 @@ An adapted factorization model similar to the PARAFAC/CANDECOMP factorisation al
 ```python
 import commonfate
 
-# forward transform
+# # forward transform
+
+# STFT Parameters
+
+framelength = 1024
+hopsize = 256
 X = commonfate.transform.forward(signal, framelength, hopsize)
+
+# Patch Parameters
+W = (32, 48)
+mhop = (16, 24)
+
 Z = commonfate.transform.forward(X, W, mhop, real=False)
 
 # inverse transform of cft
@@ -82,7 +92,7 @@ components = decompose.process(
 
 # write out the third component to wave file
 sf.write(
-    "component_3.wav",
+    "comp_3.wav",
     components[2, ...],
     fs
 )
