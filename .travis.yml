@@ -8,6 +8,7 @@ virtualenv:
 before_install:
     - sudo apt-get update -qq
     - if [[ $TRAVIS_PYTHON_VERSION == *"2."* ]]; then sudo apt-get install python-numpy python-scipy; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == *"3."* ]]; then sudo apt-get install python3-numpy python3-scipy; fi
     - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
 install:
     - pip install -e 'git+https://github.com/dgasmith/opt_einsum.git#egg=opt_einsum'

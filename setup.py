@@ -6,7 +6,7 @@ if __name__ == "__main__":
         name='commonfate',
 
         # Version
-        version="0.1.2",
+        version="0.1.3",
 
         # Description
         description='Common Fate Transform and Model',
@@ -57,6 +57,7 @@ if __name__ == "__main__":
             'Intended Audience :: Telecommunications Industry',
             'Intended Audience :: Science/Research',
             'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
             'Topic :: Multimedia :: Sound/Audio :: Analysis',
             'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis'
         ],

@@ -1,6 +1,6 @@
 from __future__ import division
-import transform
-import model
+from . import transform
+from . import model
 import numpy as np
 
 

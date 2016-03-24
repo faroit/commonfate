@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import itertools
 import scipy.fftpack
@@ -102,7 +103,7 @@ def split(sig, frameShape, hop, weightFrames=True, verbose=False):
     ):
         # display from time to time if asked for
         if verbose and (not iframe % 100):
-            print 'Splitting : frame ' + str(iframe) + '/' + str(nFrames)
+            print('Splitting : frame ' + str(iframe) + '/' + str(nFrames))
 
         # build the slice to use for extracting the signal of this frame.
         frameRange = [Ellipsis]
@@ -240,7 +241,7 @@ def overlapadd(S, fdim, hop, shape=None, weightedFrames=True, verbose=False):
     ):
         # display from time to time if asked for
         if verbose and (not iframe % 100):
-            print 'overlap-add : frame ' + str(iframe) + '/' + str(nFrames)
+            print('overlap-add : frame ' + str(iframe) + '/' + str(nFrames))
 
         # build the slice to use for overlap-adding the signal of this frame.
         frameRange = [Ellipsis]

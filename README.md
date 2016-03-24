@@ -110,10 +110,6 @@ pip install -e 'git+https://github.com/dgasmith/opt_einsum.git#egg=opt_einsum'
 
 _commonfate_ automatically detects if the package is installed.
 
-## Python 3
-
-This package does only support Python 2.7 for now because of opt_einsum.
-
 ## References
 
 You can download and read the paper [here](https://hal.archives-ouvertes.fr/hal-01248012/file/common_fate_icassp2016.pdf).
