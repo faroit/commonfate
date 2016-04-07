@@ -18,6 +18,8 @@ An adapted factorization model similar to the PARAFAC/CANDECOMP factorisation al
 
 ## Usage
 
+See the full API documentation at http://aliutkus.github.io/commonfate.
+
 ### Applying the Common Fate Transform
 
 ```python
