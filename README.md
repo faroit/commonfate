@@ -1,7 +1,5 @@
 # Common Fate Transform and Model for Python
 
-[![Build Status](https://travis-ci.org/aliutkus/commonfate.svg?branch=master)](https://travis-ci.org/aliutkus/commonfate)
-
 This package is a python implementation of the _Common Fate Transform and Model_ to be used for audio source separation as described in [an ICASSP 2016 paper "Common Fate Model for Unison source Separation"](https://hal.archives-ouvertes.fr/hal-01248012/file/common_fate_icassp2016.pdf).
 
 ### Common Fate Transform
